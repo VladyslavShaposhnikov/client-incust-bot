@@ -36,13 +36,13 @@ async def katalog(message: types.MessageAutoDeleteTimerChanged):
     ls = []
     list_of_ivents = await sqlite_db.sql_read(limit=2)
     for ivent in list_of_ivents:
-        await bot.send_photo(message.chat.id, ivent[5],f'{ivent[1]}\nЗаголовок: {ivent[3]}\nОписание: {ivent[4]}\n')
-        await message.answer(text=f'Подробнее о {ivent[1]}', reply_markup=feedback(callback_data='btn'+str(ivent[0])))
-        if int(message.from_user.id) == int(ivent[2]):
-            await message.answer(text=f'удалить событие {ivent[1]}', reply_markup=keybdel(id='delet'+str(ivent[0])))
-        ls.append(ivent[0])
-    count_of_db_elem = await sqlite_db.sql_get_count()
-    if count_of_db_elem[0] > 2:
+        await bot.send_photo(message.chat.id, ivent.media,f'{ivent.name}\nЗаголовок: {ivent.title}\nОписание: {ivent.description}\n')
+        await message.answer(text=f'Подробнее о {ivent.name}', reply_markup=feedback(callback_data='btn'+str(ivent.id)))
+        if int(message.from_user.id) == int(ivent.i_id):
+            await message.answer(text=f'удалить событие {ivent.name}', reply_markup=keybdel(id='delet'+str(ivent.id)))
+        ls.append(ivent.id)
+    count_of_db_elem = await sqlite_db.sql_all()
+    if count_of_db_elem > 2:
         await message.answer('Показать больше', reply_markup=pagin(num1='one'+str(ls[-1]), num5='five'+str(ls[-1])))
 
 #@dp.callback_query_handler(text_contains='one')
@@ -50,13 +50,13 @@ async def katalog(message: types.MessageAutoDeleteTimerChanged):
 async def one(call: CallbackQuery):
     last_id = int(call.data.replace('one', ''))
     ivent = await sqlite_db.sql_read2(last_id=last_id, limit=1)
-    await bot.send_photo(call.message.chat.id, ivent[0][5],f'{ivent[0][1]}\nЗаголовок: {ivent[0][3]}\nОписание: {ivent[0][4]}\n')
-    await call.message.answer(text=f'Подробнее о {ivent[0][1]}', reply_markup=feedback(callback_data='btn'+str(ivent[0][0])))
-    if int(call.from_user.id) == int(ivent[0][2]):
-        await call.message.answer(text=f'удалить событие {ivent[0][1]}', reply_markup=keybdel(id='delet'+str(ivent[0][0])))
+    await bot.send_photo(call.message.chat.id, ivent.media,f'{ivent.name}\nЗаголовок: {ivent.title}\nОписание: {ivent.description}\n')
+    await call.message.answer(text=f'Подробнее о {ivent.name}', reply_markup=feedback(callback_data='btn'+str(ivent.id)))
+    if int(call.from_user.id) == int(ivent.i_id):
+        await call.message.answer(text=f'удалить событие {ivent.name}', reply_markup=keybdel(id='delet'+str(ivent.id)))
     greatest_id = await sqlite_db.sql_latest_id()
-    if ivent[0][0] != greatest_id[0]:
-        await call.message.answer('Показать больше', reply_markup=pagin(num1='one'+str(ivent[0][0]), num5='five'+str(ivent[0][0])))
+    if ivent.id != greatest_id:
+        await call.message.answer('Показать больше', reply_markup=pagin(num1='one'+str(ivent.id), num5='five'+str(ivent.id)))
 
 #@dp.callback_query_handler(text_contains='five')
 # pagination [+5]button
@@ -65,31 +65,31 @@ async def five(call: CallbackQuery):
     ivents = await sqlite_db.sql_read2(last_id=last_id, limit=5)
     ls = []
     for ivent in ivents:
-        await bot.send_photo(call.message.chat.id, ivent[5],f'{ivent[1]}\nЗаголовок: {ivent[3]}\nОписание: {ivent[4]}\n')
-        await call.message.answer(text=f'Подробнее о {ivent[1]}', reply_markup=feedback(callback_data='btn'+str(ivent[0])))
-        if int(call.from_user.id) == int(ivent[2]):
-            await call.message.answer(text=f'удалить событие {ivent[1]}', reply_markup=keybdel(id='delet'+str(ivent[0])))
-        ls.append(ivent[0])
+        await bot.send_photo(call.message.chat.id, ivent.media,f'{ivent.name}\nЗаголовок: {ivent.title}\nОписание: {ivent.description}\n')
+        await call.message.answer(text=f'Подробнее о {ivent.name}', reply_markup=feedback(callback_data='btn'+str(ivent.id)))
+        if int(call.from_user.id) == int(ivent.i_id):
+            await call.message.answer(text=f'удалить событие {ivent.name}', reply_markup=keybdel(id='delet'+str(ivent.id)))
+        ls.append(ivent.id)
     greatest_id = await sqlite_db.sql_latest_id()
-    if ls[-1] != greatest_id[0]:
+    if ls[-1] != greatest_id:
         await call.message.answer('Показать больше', reply_markup=pagin(num1='one'+str(ls[-1]), num5='five'+str(ls[-1])))
 
 #@dp.callback_query_handler(text_contains='btn')
 # inline button [Связатся]
 async def callb(call: CallbackQuery):
     ivent = await sqlite_db.sql_get_ivent(int(call.data.replace('btn', '')))
-    await call.message.answer(text='Выберите действие', reply_markup=keyboard3('id'+str(ivent[0]), 'chat'+str(ivent[0])))
+    await call.message.answer(text='Выберите действие', reply_markup=keyboard3('id'+str(ivent.id), 'chat'+str(ivent.id)))
 
 #@dp.callback_query_handler(text_contains='chat')
 # inline button [Войти в чат]
 async def new_callb(call: CallbackQuery, state: FSMContext):
     ivent = await sqlite_db.sql_get_ivent(int(call.data.replace('chat', '')))
-    await call.message.answer(text=f'Bы вошли в чат с владельцем события "{ivent[3]}"', reply_markup=keyboard2)
+    await call.message.answer(text=f'Bы вошли в чат с владельцем события "{ivent.title}"', reply_markup=keyboard2)
     await Messages.messages_name.set()
     async with state.proxy() as data1:
-        data1['ivent_id'] = ivent[0]
-        data1['ivent_title'] = ivent[3]
-        data1['user_id'] = ivent[2]
+        data1['ivent_id'] = ivent.id
+        data1['ivent_title'] = ivent.title
+        data1['user_id'] = ivent.i_id
 
 #@dp.message_handler(state=Messages.messages_name)
 # sending message to ivent owner
@@ -109,7 +109,7 @@ async def messages_name(message:types.Message,state:FSMContext):
 # inline button [Показать событие]
 async def get_ivent(call: CallbackQuery):
     iv = await sqlite_db.sql_get_ivent(call.data.replace('id', ''))
-    await bot.send_photo(call.message.chat.id, iv[5],f'{iv[1]}\nЗаголовок: {iv[3]}\nОписание: {iv[4]}\n')
+    await bot.send_photo(call.message.chat.id, iv.media,f'{iv.name}\nЗаголовок: {iv.title}\nОписание: {iv.description}\n')
 
 # @dp.message_handler(lambda message: message.text == "❌Выйти из чата", state='*')
 # cancel chat
@@ -138,7 +138,7 @@ async def del_yes(call: CallbackQuery):
 # if user relly want delete ivent
 async def del_no(call: CallbackQuery):
     ivent = await sqlite_db.sql_get_ivent(int(call.data.replace('no', '')))
-    await call.message.edit_text(text=f'удалить событие {ivent[1]}', reply_markup=keybdel(id='delet'+str(ivent[0])))
+    await call.message.edit_text(text=f'удалить событие {ivent.name}', reply_markup=keybdel(id='delet'+str(ivent.id)))
 
 #@dp.message_handler(lambda message: message.text == "❌ Отменить операцию", state='*')
 # stop create ivent
