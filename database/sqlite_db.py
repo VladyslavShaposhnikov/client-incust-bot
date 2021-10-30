@@ -225,5 +225,5 @@ async def sql_get_ivent(id):
 
 # delete event
 async def sql_del_ivent(id):
-    session.query(Katalog).filter(id=id).delete()
+    session.query(Katalog).filter_by(id=id).delete()
     session.commit()

@@ -1,4 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+from sqlalchemy.sql.expression import text
 
 # main menu
 keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -18,11 +19,11 @@ def feedback(callback_data):
     return fb_keyb
 
 # delete button
-def keybdel(id):
-    delet = InlineKeyboardMarkup()
-    inline_kb = InlineKeyboardButton(text='Удалить', callback_data=id)
-    delet.add(inline_kb)
-    return delet
+#def keybdel(id):
+#    delet = InlineKeyboardMarkup()
+#    inline_kb = InlineKeyboardButton(text='Удалить', callback_data=id)
+#    delet.add(inline_kb)
+#    return delet
 
 # menu for chat
 keyboard2 = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -30,12 +31,12 @@ buttons2 = "❌Выйти из чата"
 keyboard2.add(buttons2)
 
 # feedback
-def keyboard3(ar, chat):
-    ky3 = InlineKeyboardMarkup()
-    inline_kb3 = InlineKeyboardButton(text='показать событие', callback_data=ar)
-    inline_kb31 = InlineKeyboardButton(text='войти в чат', callback_data=chat)
-    ky3.add(inline_kb3, inline_kb31)
-    return ky3
+#def keyboard3(ar, chat):
+#    ky3 = InlineKeyboardMarkup()
+#    inline_kb3 = InlineKeyboardButton(text='показать событие', callback_data=ar)
+#    inline_kb31 = InlineKeyboardButton(text='войти в чат', callback_data=chat)
+#    ky3.add(inline_kb3, inline_kb31)
+#    return ky3
 
 # pagination
 def pagin(num1, num5):
@@ -60,3 +61,12 @@ def serv_keyboard(user_full_name, ivent_name, ivent_id, chat_id):
     ser_inl = InlineKeyboardButton(text=f'Посмотреть событие {ivent_name}', callback_data=f'Посмотреть событие,{ivent_name},{ivent_id}')
     serv_keyboard.add(ser_in, ser_inl)
     return serv_keyboard
+
+def nnn(chat, id, own_id, user_id):
+    new = InlineKeyboardMarkup()
+    cal = InlineKeyboardButton(text='Связатся', callback_data=chat)
+    cal2 = InlineKeyboardButton(text='Удалить', callback_data=id)
+    new.add(cal)
+    if own_id == user_id:
+        new.add(cal2)
+    return new
