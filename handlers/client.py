@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery
 
 from create_bot import bot
 from config import SERVER_BOT_TOKEN
-from markup import keyboard, cancel_keyboard, keyboard2, keyboard3, pagin, delete_ivent, serv_keyboard, nnn
+from markup import keyboard, cancel_keyboard, keyboard2, pagin, delete_ivent, serv_keyboard, nnn
 from database import sqlite_db
 
 
@@ -24,16 +24,12 @@ class Messages(StatesGroup):
     messages_name = State()
 
 #@dp.message_handler(commands=['start', 'help'])
-async def commands_start(message : types.message, state:FSMContext):
-    current_state = await state.get_state()
+async def commands_start(message : types.message):
+    await message.answer('Добро пожаловать {}!'.format(message.from_user.full_name), reply_markup=keyboard)
     args = message.get_args()
     if args:
-        iv = await sqlite_db.sql_get_ivent(args)
+        iv = await sqlite_db.sql_get_ivent(int(args))
         await bot.send_photo(message.chat.id, iv.media,f'{iv.name}\nTitle: {iv.title}\ndescription: {iv.description}\n')
-    await message.answer('Добро пожаловать {}!'.format(message.from_user.full_name), reply_markup=keyboard)
-    if current_state is None:
-        return
-    await state.finish()
 
 #@dp.message_handler(Text(equals="Каталог"))
 async def katalog(message: types.MessageAutoDeleteTimerChanged):
@@ -96,8 +92,8 @@ async def messages_name(message:types.Message,state:FSMContext):
 
         with bot.with_token(SERVER_BOT_TOKEN):
             await bot.send_message(data1['user_id'], f'#Сообщение {data1["ivent_title"]}\n{data1["user_name"]}: {data1["message_name"]}', reply_markup=serv_keyboard(data1['user_name'], data1['ivent_title'], data1['ivent_id'], data1['ivent_owner_id']))
-    await message.answer('Сообщение доставлено')
-    #await new_callb()
+    #await message.answer('Сообщение доставлено')
+    await new_callb()
     await state.finish()
 
 # @dp.callback_query_handler(text_contains='id')
@@ -193,7 +189,7 @@ async def process_media(message:types.Message,state:FSMContext):
 
 
 def register_hendlers(dp: Dispatcher):
-    dp.register_message_handler(commands_start, lambda message: message.text == "/start", state='*', commands=['start', 'help'])
+    dp.register_message_handler(commands_start, commands=['start', 'help'])
     dp.register_message_handler(cancel_chat, lambda message: message.text == "❌Выйти из чата", state='*')
     dp.register_message_handler(katalog, Text(equals="Каталог"))
     dp.register_message_handler(cansel_handler, lambda message: message.text == "❌ Отменить операцию", state='*')
